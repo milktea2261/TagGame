@@ -1,5 +1,4 @@
-﻿using Cinemachine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,14 +11,20 @@ public class AvatarUI : MonoBehaviour
     [SerializeField] Transform[] runnerPoints = new Transform[0];
     [SerializeField] Transform[] taggerPoints = new Transform[0];
     [Space()]
-    [SerializeField] CinemachineVirtualCamera virtualCam = null;
+    [SerializeField] Camera taggerCam = null;
+    [SerializeField] GameObject taggerChart = null;
+    [SerializeField] GameObject taggerLayout = null;
     
-    [SerializeField] Text nameText = null;
-    [SerializeField] Text descriptionText = null;
-    [SerializeField] Text walkSPDText = null;
-    [SerializeField] Text runSPDText = null;
-    [SerializeField] Text StaminaText = null;
-    [SerializeField] Text abilityText = null;
+    [SerializeField] Camera runnerCam = null;
+    [SerializeField] GameObject runnerChart = null;
+    [SerializeField] GameObject runnerLayout = null;
+
+    //[SerializeField] Text nameText = null;
+    //[SerializeField] Text descriptionText = null;
+    //[SerializeField] Text walkSPDText = null;
+    //[SerializeField] Text runSPDText = null;
+    //[SerializeField] Text StaminaText = null;
+    //[SerializeField] Text abilityText = null;
 
     [SerializeField] bool isTagger = false;
     [SerializeField] int runnerIndex = 0;
@@ -64,14 +69,14 @@ public class AvatarUI : MonoBehaviour
         AvatarData data = isTagger ? taggerDatas[index] : runnerDatas[index];
         Transform point = isTagger ? taggerPoints[index] : runnerPoints[index];
 
-        virtualCam.m_Follow = point;
+        //virtualCam.m_Follow = point;
         //virtualCam.m_LookAt = point;
 
-        nameText.text = data.name;
-        descriptionText.text = data.description;
-        walkSPDText.text = data.walkSpeed.ToString();
-        runSPDText.text = data.runSpeed.ToString();
-        StaminaText.text = data.maxStamina.ToString();
-        abilityText.text = data.ability;
+        //nameText.text = data.name;
+        //descriptionText.text = data.description;
+        //walkSPDText.text = data.walkSpeed.ToString();
+        //runSPDText.text = data.runSpeed.ToString();
+        //StaminaText.text = data.maxStamina.ToString();
+        //abilityText.text = data.ability;
     }
 }
