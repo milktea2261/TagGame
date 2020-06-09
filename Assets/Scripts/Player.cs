@@ -42,6 +42,6 @@ public class Player : MonoBehaviour
 
     public void RunToogle() {
         isRun = !isRun;
-        GameManager.Instance.uiManager.RunBtn(isRun);
+        //GameManager.Instance.uiManager.RunBtn(isRun);
     }
 }

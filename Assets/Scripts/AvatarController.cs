@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 //共通類，遵從遊戲規則，提供控制的方法
@@ -26,6 +27,8 @@ public class AvatarController : MonoBehaviour
 
     public float ablityCoolTime = 30f;//能力冷卻時間
     private float ablityTimer = 0f;
+
+    public TextMeshPro headText = null;
 
     private void Start() {
         Stamina = maxStamina;
@@ -89,7 +92,8 @@ public class AvatarController : MonoBehaviour
     public void Freeze() {
         if(gameObject.CompareTag(AvatarTag.Runner.ToString())) {
             IsFreeze = true;
-            rend.material = GameManager.Instance.freezeMat;
+            headText.text = "Freeze";
+            headText.color = Color.white;
         }
     }
 
@@ -97,7 +101,8 @@ public class AvatarController : MonoBehaviour
     public void UnFreeze() {
         if(gameObject.CompareTag(AvatarTag.Runner.ToString())) {
             IsFreeze = false;
-            rend.material = GameManager.Instance.runnerMat;
+            headText.text = "Runner";
+            headText.color = Color.green;
         }
     }
 
@@ -109,14 +114,16 @@ public class AvatarController : MonoBehaviour
         switch(avatar) {
             case AvatarTag.Tagger:
                 //Debug.Log("Tagger");
-                rend.material = GameManager.Instance.taggerMat;
+                headText.text = "Tagger";
+                headText.color = Color.red;
 
                 walkSpeed = .9f;
                 RunSpeed = 2.3f;
                 break;
             case AvatarTag.Runner:
                 //Debug.Log("Runner");
-                rend.material = GameManager.Instance.runnerMat;
+                headText.text = "Runner";
+                headText.color = Color.white;
 
                 walkSpeed = 1f;
                 RunSpeed = 2f;

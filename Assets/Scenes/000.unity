@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 0
+  m_UseShadowmask: 1
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -1530,79 +1530,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1640029954}
   m_RootOrder: 46
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &183449462
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 183449464}
-  - component: {fileID: 183449463}
-  m_Layer: 0
-  m_Name: GameManager
-  m_TagString: GameController
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &183449463
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 183449462}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac2ab88bbee357d4a839987176f78b13, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uiManager: {fileID: 825277838}
-  playerCount: 12
-  taggerRate: 0.1
-  gameTime: 180
-  timer: 0
-  aiPrefab: {fileID: 3648286792223085256, guid: 04ba809247fffd54c96c207784076e0a,
-    type: 3}
-  players: []
-  unUseAvatars: []
-  runnerSpawnPoints:
-  - {fileID: 305283287}
-  - {fileID: 1900915911}
-  - {fileID: 1402118531}
-  - {fileID: 939880323}
-  - {fileID: 136037641}
-  - {fileID: 399210837}
-  - {fileID: 1478829505}
-  - {fileID: 2021479040}
-  - {fileID: 398501093}
-  - {fileID: 815111527}
-  - {fileID: 1869370723}
-  - {fileID: 1506190662}
-  - {fileID: 1618892104}
-  - {fileID: 877593636}
-  - {fileID: 2053631890}
-  - {fileID: 1157666760}
-  taggerSpawnPoint: {fileID: 453360105}
-  taggerMat: {fileID: 2100000, guid: 6e1a1756382720b4caa0384ca8cf5e63, type: 2}
-  runnerMat: {fileID: 2100000, guid: db28bd32794b1c447bcf072424d580c1, type: 2}
-  freezeMat: {fileID: 2100000, guid: 55b2862d5c55c4f4796220532bed168f, type: 2}
---- !u!4 &183449464
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 183449462}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &194276516
 GameObject:
@@ -3809,7 +3736,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 183449463}
+      - m_Target: {fileID: 0}
         m_MethodName: MainMenu
         m_Mode: 1
         m_Arguments:
@@ -5438,9 +5365,6 @@ MonoBehaviour:
   gameText: {fileID: 706741908}
   avatarStateText: {fileID: 1477682290}
   runToogleText: {fileID: 1096139888}
-  playerCountText: {fileID: 0}
-  taggerRateText: {fileID: 0}
-  gameTimeText: {fileID: 0}
   staminaBar: {fileID: 453758786}
   pausePanel: {fileID: 743545225}
   gameOverPanel: {fileID: 2145884449}
@@ -7583,6 +7507,75 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1640029954}
   m_RootOrder: 109
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1109758276
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1109758278}
+  - component: {fileID: 1109758277}
+  m_Layer: 0
+  m_Name: LevelManager
+  m_TagString: GameController
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1109758277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1109758276}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbc606e4ce2c1794e95d8a1a84e0aea5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uiManager: {fileID: 825277838}
+  timer: 0
+  aiPrefab: {fileID: 3648286792223085256, guid: 04ba809247fffd54c96c207784076e0a,
+    type: 3}
+  players: []
+  runnerSpawnPoints:
+  - {fileID: 305283287}
+  - {fileID: 1900915911}
+  - {fileID: 1402118531}
+  - {fileID: 939880323}
+  - {fileID: 136037641}
+  - {fileID: 399210837}
+  - {fileID: 1478829505}
+  - {fileID: 2021479040}
+  - {fileID: 398501093}
+  - {fileID: 815111527}
+  - {fileID: 1869370723}
+  - {fileID: 1506190662}
+  - {fileID: 1618892104}
+  - {fileID: 877593636}
+  - {fileID: 2053631890}
+  - {fileID: 1157666760}
+  taggerSpawnPoint: {fileID: 453360105}
+  taggerMat: {fileID: 2100000, guid: 6e1a1756382720b4caa0384ca8cf5e63, type: 2}
+  runnerMat: {fileID: 2100000, guid: db28bd32794b1c447bcf072424d580c1, type: 2}
+  freezeMat: {fileID: 2100000, guid: 55b2862d5c55c4f4796220532bed168f, type: 2}
+--- !u!4 &1109758278
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1109758276}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1111935334
 GameObject:
@@ -13319,7 +13312,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 183449463}
+      - m_Target: {fileID: 0}
         m_MethodName: MainMenu
         m_Mode: 1
         m_Arguments:
@@ -15027,7 +15020,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 183449463}
+      - m_Target: {fileID: 0}
         m_MethodName: Resume
         m_Mode: 1
         m_Arguments:
