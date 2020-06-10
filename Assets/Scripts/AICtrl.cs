@@ -3,36 +3,35 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-[RequireComponent(typeof(AvatarController))]
 [RequireComponent(typeof(NavMeshAgent))]
-public class AIBrain : MonoBehaviour {
-
+[RequireComponent(typeof(AISensor))]
+//決策，執行
+public class AICtrl : AvatarCtrl {
     public enum AIState { Idle, Wonder, Flee, Hunt }
+    [Header("AI Part")]
     public AIState state = AIState.Idle;
-
-    [Space()]
-    [SerializeField] protected AISensor sensor = null;//感測
-    [SerializeField] protected AvatarController avatarCtrl = null;//執行
-    [SerializeField] protected NavMeshAgent agent = null;//輔助，獲得路線
-    
-    [Space()]
-    [SerializeField]protected AvatarController m_target;//目標
+    [SerializeField] AISensor sensor = null;//感測
+    [SerializeField] NavMeshAgent agent = null;//輔助，獲得路線
+    [SerializeField] AvatarCtrl m_target;//目標
 
     float fleeTime = 5f;
-    [SerializeField]float stateTimer = 0;
-    
-    private void Update() {
+    float stateTimer = 0;
+    protected override float currentSpeed => agent.velocity.magnitude;
+
+    protected override void Update() {
+        base.Update();
+
         agent.nextPosition = transform.position;//刷新代理的位置
 
         //獲取資訊
         Collider[] colliders = sensor.DetectInRange();
 
-        AvatarController newTarget = GetTarget(colliders);
+        AvatarCtrl newTarget = GetTarget(colliders);
         m_target = newTarget;
 
         #region 轉換狀態
 
-        if(state == AIState.Idle && !avatarCtrl.IsFreeze) {
+        if(state == AIState.Idle && !IsFreeze) {
             state = AIState.Wonder;
             agent.isStopped = false;
         }
@@ -87,7 +86,7 @@ public class AIBrain : MonoBehaviour {
         if(m_target == null) {
             state = AIState.Wonder;
         }
-        if(avatarCtrl.IsFreeze) {
+        if(IsFreeze) {
             state = AIState.Idle;
         }
 
@@ -113,8 +112,8 @@ public class AIBrain : MonoBehaviour {
         }
     }
 
-    private AvatarController GetTarget(Collider[] colliders) {
-        AvatarController closetTarget = null;
+    private AvatarCtrl GetTarget(Collider[] colliders) {
+        AvatarCtrl closetTarget = null;
         float closetDst = float.MaxValue;
         if(m_target != null) {
             closetDst = Vector3.Distance(transform.position, m_target.transform.position);
@@ -126,12 +125,12 @@ public class AIBrain : MonoBehaviour {
             //Runner的選擇邏輯: 對方是Tagger 或是 對方是runner且被抓到，最靠近自己
             foreach(Collider c in colliders) {
                 if(c.CompareTag(AvatarTag.Tagger.ToString())) {
-                    closetTarget = c.GetComponent<AvatarController>();
+                    closetTarget = c.GetComponent<AvatarCtrl>();
                     break;
                 }
                 else {
                     
-                    AvatarController controller = c.GetComponent<AvatarController>();
+                    AvatarCtrl controller = c.GetComponent<AvatarCtrl>();
                     if(controller.IsFreeze) {
                         float dst = Vector3.Distance(transform.position, controller.transform.position);
                         if(dst < closetDst) {
@@ -146,7 +145,7 @@ public class AIBrain : MonoBehaviour {
             //Tagger的選擇邏輯:對方是Runner且沒有被抓到，最靠近自己
             foreach(Collider c in colliders) {
                 if(c.CompareTag(AvatarTag.Runner.ToString())){
-                    AvatarController controller = c.GetComponent<AvatarController>();
+                    AvatarCtrl controller = c.GetComponent<AvatarCtrl>();
                     if(!controller.IsFreeze) {
                         float dst = Vector3.Distance(transform.position, controller.transform.position);
                         if(dst < closetDst) {
@@ -160,7 +159,6 @@ public class AIBrain : MonoBehaviour {
 
         return closetTarget;
     }
-
 
     #region AI_Behaviour
 
@@ -182,7 +180,7 @@ public class AIBrain : MonoBehaviour {
             Vector3 randPoint = transform.position + transform.forward * randomRange / 2 + Random.insideUnitSphere * randomRange;//隨機的方向
             NavMesh.SamplePosition(randPoint, out NavMeshHit hit, 3f, NavMesh.AllAreas);
 
-            agent.speed = avatarCtrl.GetMoveSpeed(false);
+            agent.speed = MoveSpeed(false);
             agent.SetDestination(hit.position);
         }
     }
@@ -201,7 +199,7 @@ public class AIBrain : MonoBehaviour {
             Vector3 fleePoint = transform.position + fleeDir * fleeRange / 2 + Random.insideUnitSphere * fleeRange;//隨機的方向
             NavMesh.SamplePosition(fleePoint, out NavMeshHit hit, 3f, NavMesh.AllAreas);
 
-            agent.speed = avatarCtrl.GetMoveSpeed(true);
+            agent.speed = MoveSpeed(true);
             agent.SetDestination(hit.position);
 
             stateTimer = fleeTime;
@@ -213,13 +211,15 @@ public class AIBrain : MonoBehaviour {
     /// </summary>
     private void Hunt() {
         //Debug.Log(name + " Hunt " + m_target.name);
-        agent.speed = avatarCtrl.GetMoveSpeed(true);
+        agent.speed = MoveSpeed(true);
         agent.SetDestination(m_target.transform.position);
     }
 
     #endregion
 
     private void OnDrawGizmos() {
+        if(agent == null) { return; }
+
         Gizmos.color = Color.gray;
         Vector3[] path = agent.path.corners;
         if(path != null) {

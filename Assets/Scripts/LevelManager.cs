@@ -10,7 +10,7 @@ public class LevelManager : MonoBehaviour {
     public int FreezeCount {
         get {
             int counter = 0;
-            foreach(AvatarController player in players) {
+            foreach(AvatarCtrl player in players) {
                 if(player.IsFreeze)
                     counter++;
             }
@@ -23,30 +23,29 @@ public class LevelManager : MonoBehaviour {
     private bool isGameOver = false;
     private bool isGameStart = false;
 
-    AvatarController playerControl = null;
-    public AvatarController aiPrefab = null;
-    public List<AvatarController> players = new List<AvatarController>();
-    public GameObject[] models = new GameObject[0];
-    public TextMeshPro headText = null;
+    AvatarCtrl playerControl = null;
+    public AvatarCtrl aiPrefab = null;
+    public List<AvatarCtrl> players = new List<AvatarCtrl>();
+    public Animator[] characters = new Animator[0];
 
     public Transform[] runnerSpawnPoints;
     public Transform taggerSpawnPoint;
 
     private void Awake() {
-        playerControl = GameObject.FindGameObjectWithTag("Player").GetComponent<AvatarController>();
+        playerControl = FindObjectOfType<PlayerCtrl>();
     }
 
     //生成玩家，出生位置
     private void Start() {
         //生成玩家
-        players = new List<AvatarController>();
+        players = new List<AvatarCtrl>();
         for(int i = 0; i < GameManager.Instance.playerCount; i++) {
-            AvatarController avatar;
+            AvatarCtrl avatar;
             if(i == 0) {
                 avatar = playerControl;//玩家
             }
             else {
-                GameObject model = models[0];
+                Animator model = characters[0];
                 string avatarName = string.Format("AI[{0}]", (i - 1).ToString("00"));
                 avatar = CreateAvatar(model, avatarName);
             }
@@ -105,21 +104,20 @@ public class LevelManager : MonoBehaviour {
     }
 
     //生成玩家等初始設定
-    AvatarController CreateAvatar(GameObject avatarModel, string avatarName) {
-        AvatarController avatar = Instantiate<AvatarController>(aiPrefab);
+    AvatarCtrl CreateAvatar(Animator avatarModel, string avatarName) {
+        AvatarCtrl avatar = Instantiate<AvatarCtrl>(aiPrefab);
         avatar.name = avatarName;
 
-        GameObject model = Instantiate<GameObject>(avatarModel, avatar.transform);
+        Animator character = Instantiate<Animator>(avatarModel, avatar.transform);
+        avatar.animator = character;
 
-        TextMeshPro text = Instantiate<TextMeshPro>(headText, avatar.transform);
-        avatar.headText = text;
         return avatar;
     }
 
     //開始遊戲
     public void GameStart() {
         timer = GameManager.Instance.gameTime;
-        foreach(AvatarController avatar in players) {
+        foreach(AvatarCtrl avatar in players) {
             avatar.UnFreeze();
             avatar.gameObject.SetActive(true);
         }
