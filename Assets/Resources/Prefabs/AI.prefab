@@ -86,7 +86,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e06ddb9c9b59de4784e5ae69cc32138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  data: {fileID: 11400000, guid: 753dae1e702e5e843aeabad9afa74f17, type: 2}
+  data: {fileID: 0}
   animator: {fileID: 0}
   headText: {fileID: 4426601854014548908}
   avatarMask:

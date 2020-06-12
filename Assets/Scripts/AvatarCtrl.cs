@@ -8,7 +8,7 @@ public enum AvatarTag { Runner, Tagger }
 public class AvatarCtrl : MonoBehaviour
 {
     [SerializeField] AvatarData data = null;
-    public Animator animator = null;
+    [SerializeField] Animator animator = null;
     [SerializeField] TextMeshPro headText = null;
 
     public LayerMask avatarMask;
@@ -16,12 +16,13 @@ public class AvatarCtrl : MonoBehaviour
     protected bool isRunning = false;
     protected float rotSpeed = 180;
 
-    public float walkSpeed = 1f;
-    public float RunSpeed = 2f;
-    protected virtual float currentSpeed => 0;
+    public AvatarAttribute moveSpeed;
+    public AvatarAttribute maxStamina;
+
+    private float RunMutiple = 1.5f;//跑步速度的倍率
+    protected virtual float CurrentSpeed => 0;
 
     public float Stamina { get; private set; }
-    public float maxStamina = 100;
     protected float staminaRecovery = 5f;//耐力恢復量
     protected float staminaConsumption = 10f;//耐力消耗量
 
@@ -29,17 +30,17 @@ public class AvatarCtrl : MonoBehaviour
     private float ablityTimer = 0f;
 
     protected virtual void Start() {
-        Stamina = maxStamina;
+        Stamina = maxStamina.FinalValue;
     }
 
     protected virtual void Update() {
         ablityTimer -= Time.deltaTime;
 
         if(isRunning) {
-            Stamina = Mathf.Clamp(Stamina - staminaConsumption * Time.deltaTime, 0, maxStamina);
+            Stamina = Mathf.Clamp(Stamina - staminaConsumption * Time.deltaTime, 0, maxStamina.FinalValue);
         }
         else {
-            Stamina = Mathf.Clamp(Stamina + staminaRecovery * Time.deltaTime, 0, maxStamina);
+            Stamina = Mathf.Clamp(Stamina + staminaRecovery * Time.deltaTime, 0, maxStamina.FinalValue);
         }
 
         Collider[] colliders = Physics.OverlapSphere(transform.position, 0.5f, avatarMask); 
@@ -56,10 +57,14 @@ public class AvatarCtrl : MonoBehaviour
             }
         }
 
-        animator.SetFloat("MoveSpeed", currentSpeed);
+        animator.SetFloat("MoveSpeed", CurrentSpeed);
         animator.SetBool("IsRunning", isRunning);
     }
 
+    public virtual void Init(Animator animator, AvatarData data) {
+        this.data = data;
+        this.animator = animator;
+    }
 
     public float MoveSpeed(bool isRun) {
         bool canRun = false;
@@ -67,7 +72,7 @@ public class AvatarCtrl : MonoBehaviour
         canRun = canRun || (isRun && !isRunning && Stamina >= 20f);//玩家處於走路狀態，限制玩家恢復一定體力後才能跑步
 
         isRunning = isRun && canRun;
-        return isRunning ? RunSpeed : walkSpeed;
+        return isRunning ? moveSpeed.FinalValue * RunMutiple : moveSpeed.FinalValue;
     }
 
     [ContextMenu("Freeze")]
@@ -95,8 +100,7 @@ public class AvatarCtrl : MonoBehaviour
             Debug.LogError("No Avatar Data");
         }
 
-        walkSpeed = data.walkSpeed;
-        RunSpeed = data.runSpeed;
+        moveSpeed.baseValue = data.moveSpeed;
         switch(avatar) {
             case AvatarTag.Tagger:
                 headText.text = "Tagger";

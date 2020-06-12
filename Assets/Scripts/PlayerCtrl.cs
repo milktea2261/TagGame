@@ -13,7 +13,7 @@ public class PlayerCtrl : AvatarCtrl
     [SerializeField] Joystick variableJoystickRight = null;
     [SerializeField] GameObject runToogleBtn = null;
     private bool isRun = false;
-    protected override float currentSpeed => rig.velocity.magnitude;
+    protected override float CurrentSpeed => rig.velocity.magnitude;
 
     protected override void Start() {
 #if UNITY_STANDALONE
@@ -58,7 +58,7 @@ public class PlayerCtrl : AvatarCtrl
 
     void Move(Vector3 direction, bool isRun) {
         if(IsFreeze) { return; }
-        rig.velocity = direction * MoveSpeed(isRun);
+        rig.velocity = new Vector3(direction.x, rig.velocity.y, direction.z) * MoveSpeed(isRun);
         
         //rig.MovePosition(rig.position + direction * MoveSpeed(isRun) * Time.deltaTime);
     }

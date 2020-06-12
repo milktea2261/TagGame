@@ -52,9 +52,8 @@ public class AvatarLayout : MonoBehaviour
 
     ChartAttritube[] AvatarAttritubes(AvatarData data) {
         ChartAttritube[] attritubes = new ChartAttritube[3];
-        attritubes[0] = new ChartAttritube("walkSPD", data.walkSpeed, new Vector2(0, 2));
-        attritubes[1] = new ChartAttritube("runSPD", data.runSpeed, new Vector2(0, 3));
-        attritubes[2] = new ChartAttritube("stamina", data.maxStamina, new Vector2(0, 200));
+        attritubes[0] = new ChartAttritube("walkSPD", data.moveSpeed, new Vector2(0, 2));
+        attritubes[1] = new ChartAttritube("stamina", data.maxStamina, new Vector2(0, 200));
         return attritubes;
     }
 

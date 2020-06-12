@@ -16,7 +16,7 @@ public class AICtrl : AvatarCtrl {
 
     float fleeTime = 5f;
     float stateTimer = 0;
-    protected override float currentSpeed => agent.velocity.magnitude;
+    protected override float CurrentSpeed => agent.velocity.magnitude;
 
     protected override void Update() {
         base.Update();

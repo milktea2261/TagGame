@@ -27,6 +27,7 @@ public class LevelManager : MonoBehaviour {
     public AvatarCtrl aiPrefab = null;
     public List<AvatarCtrl> players = new List<AvatarCtrl>();
     public Animator[] characters = new Animator[0];
+    public AvatarData[] datas = new AvatarData[0];
 
     public Transform[] runnerSpawnPoints;
     public Transform taggerSpawnPoint;
@@ -37,28 +38,33 @@ public class LevelManager : MonoBehaviour {
 
     //生成玩家，出生位置
     private void Start() {
-        //生成玩家
+        //生成角色
         players = new List<AvatarCtrl>();
         for(int i = 0; i < GameManager.Instance.playerCount; i++) {
-            AvatarCtrl avatar;
+            AvatarCtrl ctrl;
             if(i == 0) {
-                avatar = playerControl;//玩家
+                //生成玩家的角色
+                ctrl = playerControl;
+                //CreateAvatar(ctrl, player's index);
             }
             else {
-                Animator model = characters[0];
-                string avatarName = string.Format("AI[{0}]", (i - 1).ToString("00"));
-                avatar = CreateAvatar(model, avatarName);
+                //生成AI的角色
+                ctrl = Instantiate<AvatarCtrl>(aiPrefab);
+                ctrl.name = string.Format("AI[{0}]", (i - 1).ToString("00"));
+
+                int randomIndex = Random.Range(0, characters.Length);
+                CreateAvatar(ctrl, randomIndex);
             }
-            avatar.gameObject.SetActive(false);
-            players.Add(avatar);
+            ctrl.gameObject.SetActive(false);
+            players.Add(ctrl);
         }
 
         //打亂排序
         for(int i = 0; i < players.Count; i++) {
-            int randIndex = Random.Range(0, players.Count);
+            int randomIndex = Random.Range(0, players.Count);
             var temp = players[i];
-            players[i] = players[randIndex];
-            players[randIndex] = temp;
+            players[i] = players[randomIndex];
+            players[randomIndex] = temp;
         }
 
         //設定身分，初始位置
@@ -68,6 +74,7 @@ public class LevelManager : MonoBehaviour {
                 players[i].name += " Tagger";
                 players[i].transform.position = taggerSpawnPoint.position;
                 players[i].transform.rotation = taggerSpawnPoint.rotation;
+                //players[i].moveSpeed.AddModifier(new AttributeModifier(1.5f, AttributeModifierType.Flat, "System"));
             }
             else {
                 players[i].SetAvatar(AvatarTag.Runner);
@@ -95,7 +102,7 @@ public class LevelManager : MonoBehaviour {
         }
 
         uiManager.UpdatePlayerState(playerControl.tag, playerControl.IsFreeze);
-        uiManager.UpdatePlayerStamina(playerControl.Stamina / playerControl.maxStamina);
+        uiManager.UpdatePlayerStamina(playerControl.Stamina / playerControl.maxStamina.FinalValue);
 
         timer -= Time.deltaTime;
         if(timer <= 0 || UnFrezzePlayer == 0) {
@@ -104,14 +111,9 @@ public class LevelManager : MonoBehaviour {
     }
 
     //生成玩家等初始設定
-    AvatarCtrl CreateAvatar(Animator avatarModel, string avatarName) {
-        AvatarCtrl avatar = Instantiate<AvatarCtrl>(aiPrefab);
-        avatar.name = avatarName;
-
-        Animator character = Instantiate<Animator>(avatarModel, avatar.transform);
-        avatar.animator = character;
-
-        return avatar;
+    void CreateAvatar(AvatarCtrl ctrl, int index) {
+        Animator character = Instantiate<Animator>(characters[index], ctrl.transform);
+        ctrl.Init(character, datas[index]);
     }
 
     //開始遊戲
@@ -148,7 +150,6 @@ public class LevelManager : MonoBehaviour {
     public void MainMenu() {
         Debug.LogError("TODO: Go To Main Menu");
     }
-
     public void Pause() {
         Time.timeScale = 0;
         uiManager.TogglePauseMenu();
