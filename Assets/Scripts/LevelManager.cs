@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class LevelManager : MonoBehaviour {
 
-    public UIManager uiManager;
+    [SerializeField] UIManager uiManager = null;
 
     public int FreezeCount {
         get {
@@ -26,8 +26,6 @@ public class LevelManager : MonoBehaviour {
     AvatarCtrl playerControl = null;
     public AvatarCtrl aiPrefab = null;
     public List<AvatarCtrl> players = new List<AvatarCtrl>();
-    public Animator[] characters = new Animator[0];
-    public AvatarData[] datas = new AvatarData[0];
 
     public Transform[] runnerSpawnPoints;
     public Transform taggerSpawnPoint;
@@ -45,14 +43,14 @@ public class LevelManager : MonoBehaviour {
             if(i == 0) {
                 //生成玩家的角色
                 ctrl = playerControl;
-                //CreateAvatar(ctrl, player's index);
+                CreateAvatar(ctrl, GameManager.Instance.playerAvatarIndex);
             }
             else {
                 //生成AI的角色
                 ctrl = Instantiate<AvatarCtrl>(aiPrefab);
                 ctrl.name = string.Format("AI[{0}]", (i - 1).ToString("00"));
 
-                int randomIndex = Random.Range(0, characters.Length);
+                int randomIndex = Random.Range(0, GameManager.Instance.datas.Length);
                 CreateAvatar(ctrl, randomIndex);
             }
             ctrl.gameObject.SetActive(false);
@@ -112,8 +110,8 @@ public class LevelManager : MonoBehaviour {
 
     //生成玩家等初始設定
     void CreateAvatar(AvatarCtrl ctrl, int index) {
-        Animator character = Instantiate<Animator>(characters[index], ctrl.transform);
-        ctrl.Init(character, datas[index]);
+        Animator character = Instantiate<Animator>(GameManager.Instance.datas[index].avatarPrefab, ctrl.transform);
+        ctrl.Init(character, GameManager.Instance.datas[index]);
     }
 
     //開始遊戲
@@ -148,7 +146,7 @@ public class LevelManager : MonoBehaviour {
 
     //返回主選單
     public void MainMenu() {
-        Debug.LogError("TODO: Go To Main Menu");
+        GameManager.Instance.LoadLevel("Main");
     }
     public void Pause() {
         Time.timeScale = 0;

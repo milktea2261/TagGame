@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 279b75f0ac1a7a9428cf34c25955c2ce, type: 3}
   m_Name: Michelle
   m_EditorClassIdentifier: 
-  description: "\u9AD4\u529B\u975E\u5E38\u597D"
-  walkSpeed: 1
-  runSpeed: 2
-  maxStamina: 150
-  ability: None
-  avatarModel: {fileID: 0}
+  description: "\u821E\u8005\uFF0C\u6709\u8F03\u597D\u9AD4\u529B\n"
+  walkSpeed: 1.2
+  runSpeed: 2.4
+  maxStamina: 120
+  ability: 
+  avatarPrefab: {fileID: 8900732591445921957, guid: 393b8835edcfd9840b3dbdf91169fb91,
+    type: 3}

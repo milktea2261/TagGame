@@ -54,7 +54,7 @@ public class BuffManager : MonoBehaviour
         buffs.Add(buff);
         //add mods
         if(buff.moveSpeedFlat != 0) {
-            target.moveSpeed.AddModifier(new AttributeModifier(buff.moveSpeedFlat, AttributeModifierType.Flat, buff.source));
+            target.walkSpeed.AddModifier(new AttributeModifier(buff.moveSpeedFlat, AttributeModifierType.Flat, buff.source));
         }
         if(buff.staminaFlat != 0) {
             target.maxStamina.AddModifier(new AttributeModifier(buff.staminaFlat, AttributeModifierType.Flat, buff.source));
@@ -67,7 +67,7 @@ public class BuffManager : MonoBehaviour
 
         //rmove mods
         if(buffs[index].moveSpeedFlat != 0) {
-            target.moveSpeed.RemoveModifier(new AttributeModifier(buffs[index].moveSpeedFlat, AttributeModifierType.Flat, buffs[index].source));
+            target.walkSpeed.RemoveModifier(new AttributeModifier(buffs[index].moveSpeedFlat, AttributeModifierType.Flat, buffs[index].source));
         }
         if(buffs[index].staminaFlat != 0) {
             target.maxStamina.RemoveModifier(new AttributeModifier(buffs[index].staminaFlat, AttributeModifierType.Flat, buffs[index].source));
@@ -80,7 +80,7 @@ public class BuffManager : MonoBehaviour
         Debug.Log("RemoveBUff from " + source);
         buffs.RemoveAll(x => x.source == source);
 
-        target.moveSpeed.RemoveAllModifiersFromSource(source);
+        target.walkSpeed.RemoveAllModifiersFromSource(source);
         target.maxStamina.RemoveAllModifiersFromSource(source);
         OnBuffChanged.Invoke();
     }

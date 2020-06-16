@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 279b75f0ac1a7a9428cf34c25955c2ce, type: 3}
   m_Name: Claire
   m_EditorClassIdentifier: 
-  description: "\u79FB\u52D5\u8F03\u6162\uFF0C\u4F46\u662F\u53EF\u4EE5\u77ED\u66AB\u56F0\u4F4F\u5C0D\u65B9"
-  walkSpeed: 0.9
-  runSpeed: 1.8
-  maxStamina: 100
-  ability: "\u9677\u9631"
-  avatarModel: {fileID: 0}
+  description: "\u4E0A\u73ED\u65CF\uFF0C\u79FB\u52D5\u80FD\u529B\u8F03\u597D\n"
+  walkSpeed: 1.5
+  runSpeed: 3
+  maxStamina: 80
+  ability: 
+  avatarPrefab: {fileID: 5292214698291791083, guid: 3d4eb0c9f80cc1f4084716d7e1bc2683,
+    type: 3}

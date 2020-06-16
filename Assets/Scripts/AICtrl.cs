@@ -12,85 +12,80 @@ public class AICtrl : AvatarCtrl {
     public AIState state = AIState.Idle;
     [SerializeField] AISensor sensor = null;//感測
     [SerializeField] NavMeshAgent agent = null;//輔助，獲得路線
-    [SerializeField] AvatarCtrl m_target;//目標
 
-    float fleeTime = 5f;
-    float stateTimer = 0;
-    protected override float CurrentSpeed => agent.velocity.magnitude;
+    [SerializeField] bool isChangeState = false;
+    [SerializeField] float stateTimer = 0;
+    [SerializeField] AvatarCtrl m_target;//目標
+    Vector3 targetLastPosition;
+
+    float stateTime = 5f;
+    float randRange = 5f;
+    float sampleRange = 1f;
+
 
     protected override void Update() {
         base.Update();
 
         agent.nextPosition = transform.position;//刷新代理的位置
-
+        
         //獲取資訊
         Collider[] colliders = sensor.DetectInRange();
-
-        AvatarCtrl newTarget = GetTarget(colliders);
-        m_target = newTarget;
+        m_target = GetTarget(colliders);
 
         #region 轉換狀態
 
         if(state == AIState.Idle && !IsFreeze) {
             state = AIState.Wonder;
-            agent.isStopped = false;
+            isChangeState = true;
         }
 
         //Tagger方
         if(gameObject.CompareTag(AvatarTag.Tagger.ToString())) {
-
             if(state == AIState.Wonder && m_target != null) {
                 state = AIState.Hunt;
+                isChangeState = true;
             }
             if(state == AIState.Hunt && m_target != null) {
                 if(m_target.IsFreeze) {
                     state = AIState.Wonder;
-                    m_target = null;
+                    isChangeState = true;
                 }
             }
-
         }
         //Runner方
         else {
-
             if(state == AIState.Wonder && m_target != null) {
                 if(m_target.CompareTag(AvatarTag.Runner.ToString())) {
                     state = AIState.Hunt;
+                    isChangeState = true;
                 }
                 else {
                     state = AIState.Flee;
+                    isChangeState = true;
                 }
             }
             if(state == AIState.Hunt && m_target != null) {
-                if(gameObject.CompareTag(AvatarTag.Runner.ToString())) {
-                    //Debug.Log(name + " try to rescue " + m_target.name + ">" + m_target.IsFreeze);
-                    if(!m_target.IsFreeze) {
-                        state = AIState.Wonder;
-                        m_target = null;
-                    }
-                }
-            }
-            if(state == AIState.Flee) {
-                if(stateTimer <= 0) {
-                    state = AIState.Wonder;
-                }
-            }
-            //確保看到Tagger會逃跑
-            if((state == AIState.Wonder || state == AIState.Hunt) && m_target != null) {
                 if(m_target.CompareTag(AvatarTag.Tagger.ToString())) {
                     state = AIState.Flee;
+                    isChangeState = true;
                 }
             }
         }
-
-        if(m_target == null) {
-            state = AIState.Wonder;
-        }
+        
         if(IsFreeze) {
             state = AIState.Idle;
+            isChangeState = true;
+        }
+        else if((state == AIState.Hunt || state == AIState.Flee) && m_target == null && stateTimer <= 0) {
+            state = AIState.Wonder;
+            isChangeState = true;
         }
 
         #endregion
+        if(m_target != null) {
+            targetLastPosition = m_target.transform.position;
+            stateTimer = stateTime;
+        }
         stateTimer -= Time.deltaTime;
 
         //執行行為
@@ -161,48 +156,79 @@ public class AICtrl : AvatarCtrl {
     }
 
     #region AI_Behaviour
+    Vector3 p;
+    Vector3 randP;
 
     private void Idle() {
-        m_target = null;
-        agent.isStopped = true;
         agent.ResetPath();
+
+        if(isChangeState) {
+            m_target = null;
+
+            agent.isStopped = true;
+            isMoving = false;
+            agent.speed = 0;
+
+            isChangeState = false;
+        }
     }
 
     /// <summary>
     /// 徘徊，在NavMesh上獲取一點，排除點在移動範圍外的可能性
     /// </summary>
+    /// 
     private void Wonder() {
         //Debug.Log(name + " Wonder");
-        if(agent.remainingDistance < 1) {
+        if(isChangeState || agent.remainingDistance < 1) {
             //Debug.Log(name + " Set Wonder Path");
-            float randomRange = 5f;
 
-            Vector3 randPoint = transform.position + transform.forward * randomRange / 2 + Random.insideUnitSphere * randomRange;//隨機的方向
-            NavMesh.SamplePosition(randPoint, out NavMeshHit hit, 3f, NavMesh.AllAreas);
-
-            agent.speed = MoveSpeed(false);
+            Vector3 wanderPoint = transform.position + transform.forward * randRange + Random.insideUnitSphere * randRange;//隨機的方向
+            NavMesh.SamplePosition(wanderPoint, out NavMeshHit hit, sampleRange, NavMesh.AllAreas);
             agent.SetDestination(hit.position);
+
+            p = transform.position + transform.forward * randRange;
+            randP = wanderPoint;
+        }
+
+        if(isChangeState) {
+            m_target = null;
+
+            agent.isStopped = false;
+            isMoving = true;
+            agent.speed = MoveSpeed(false);
+
+            stateTimer = 0;
+            isChangeState = false;
         }
     }
 
     /// <summary>
-    /// 逃離，如過方向朝向目標更換路線
+    /// 逃離，如果方向朝向目標更換路線
     /// </summary>
+    /// 
     private void Flee() {
         //Debug.Log(name + " Flee " + m_target.name);
-        if(stateTimer <= 0 || agent.remainingDistance < 1) {
+        if(isChangeState || agent.remainingDistance < 1) {
             //Debug.Log(name + " Set Flee Path");
-            float fleeRange = 5f;
-            Vector3 targetToSelf = (transform.position - m_target.transform.position).normalized;
+            Vector3 fleeDir = (transform.position - targetLastPosition).normalized;
+            Vector3 fleePoint = transform.position + fleeDir * randRange + Random.insideUnitSphere * randRange;//隨機的方向
+            NavMesh.SamplePosition(fleePoint, out NavMeshHit hit, sampleRange, NavMesh.AllAreas);
 
-            Vector3 fleeDir = targetToSelf;
-            Vector3 fleePoint = transform.position + fleeDir * fleeRange / 2 + Random.insideUnitSphere * fleeRange;//隨機的方向
-            NavMesh.SamplePosition(fleePoint, out NavMeshHit hit, 3f, NavMesh.AllAreas);
-
-            agent.speed = MoveSpeed(true);
             agent.SetDestination(hit.position);
 
-            stateTimer = fleeTime;
+            p = transform.position + fleeDir * randRange;
+            randP = fleePoint;
+        }
+
+        if(isChangeState) {
+            m_target = null;//轉身後看不到對像
+
+            agent.isStopped = false;
+            isMoving = true;
+            agent.speed = MoveSpeed(true);
+
+            stateTimer = stateTime;
+            isChangeState = false;
         }
     }
 
@@ -210,9 +236,28 @@ public class AICtrl : AvatarCtrl {
     /// 追捕
     /// </summary>
     private void Hunt() {
-        //Debug.Log(name + " Hunt " + m_target.name);
-        agent.speed = MoveSpeed(true);
-        agent.SetDestination(m_target.transform.position);
+
+        if(m_target == null && agent.remainingDistance < 1) {
+            //Debug.Log(name + " Set Wonder Path");
+            float randomRange = 5f;
+
+            Vector3 randPoint = transform.position + transform.forward * randomRange / 2 + Random.insideUnitSphere * randomRange;//隨機的方向
+            NavMesh.SamplePosition(randPoint, out NavMeshHit hit, 3f, NavMesh.AllAreas);
+
+            agent.SetDestination(hit.position);
+        }
+        else {
+            agent.SetDestination(targetLastPosition);
+        }
+
+        if(isChangeState) {
+            agent.isStopped = false;
+            isMoving = true;
+            agent.speed = MoveSpeed(true);
+
+            stateTimer = stateTime;
+            isChangeState = false;
+        }
     }
 
     #endregion
@@ -220,6 +265,7 @@ public class AICtrl : AvatarCtrl {
     private void OnDrawGizmos() {
         if(agent == null) { return; }
 
+        //路線
         Gizmos.color = Color.gray;
         Vector3[] path = agent.path.corners;
         if(path != null) {
@@ -228,6 +274,19 @@ public class AICtrl : AvatarCtrl {
                     Gizmos.DrawLine(path[i], path[i + 1]);
                 }
             }
+        }
+
+        //隨機找點的範圍
+        if(state == AIState.Wonder) {
+            Gizmos.color = Color.white;
+            Gizmos.DrawWireSphere(p, randRange);
+            Gizmos.DrawWireSphere(randP, sampleRange);
+        }
+
+        if(state == AIState.Flee) {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(p, randRange);
+            Gizmos.DrawWireSphere(randP, sampleRange);
         }
     }
 

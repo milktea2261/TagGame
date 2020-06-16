@@ -7,7 +7,8 @@ public class AvatarData : ScriptableObject
 {
     [Multiline(3)] public string description = "";
 
-    public float moveSpeed = 1f;
+    public float walkSpeed = 1f;
+    public float runSpeed = 2f;
 
     public float maxStamina = 100;
     //public float staminaRecovery = 5f;
@@ -15,5 +16,5 @@ public class AvatarData : ScriptableObject
 
     public string ability = "None";
 
-    public GameObject avatarModel;
+    public Animator avatarPrefab;
 }
