@@ -18,11 +18,6 @@ public class AICtrl : AvatarCtrl {
     [SerializeField] AvatarCtrl m_target;//目標
     Vector3 targetLastPosition;
 
-    float stateTime = 5f;
-    float randRange = 5f;
-    float sampleRange = 1f;
-
-
     protected override void Update() {
         base.Update();
 
@@ -68,6 +63,9 @@ public class AICtrl : AvatarCtrl {
                 if(m_target.CompareTag(AvatarTag.Tagger.ToString())) {
                     state = AIState.Flee;
                     isChangeState = true;
+                }else if(!m_target.IsFreeze) {
+                    state = AIState.Wonder;
+                    isChangeState = true;
                 }
             }
         }
@@ -110,12 +108,12 @@ public class AICtrl : AvatarCtrl {
     private AvatarCtrl GetTarget(Collider[] colliders) {
         AvatarCtrl closetTarget = null;
         float closetDst = float.MaxValue;
+        /*
         if(m_target != null) {
             closetDst = Vector3.Distance(transform.position, m_target.transform.position);
             closetTarget = m_target;
-            
         }
-
+        */
         if(gameObject.CompareTag(AvatarTag.Runner.ToString())) {
             //Runner的選擇邏輯: 對方是Tagger 或是 對方是runner且被抓到，最靠近自己
             foreach(Collider c in colliders) {
@@ -155,9 +153,52 @@ public class AICtrl : AvatarCtrl {
         return closetTarget;
     }
 
+    /// <summary>
+    /// 透過在某方向採樣取點的方式，獲得與現在位置一定距離的新點。
+    /// 採樣的方向順序，前方，右前X度，左前X度，右前2X度，左前2X度，以此類推。
+    /// </summary>
+    /// <param name="currentPos">現在的位置</param>
+    /// <param name="currentDir">現在的方向</param>
+    /// <param name="minDistance">最短距離</param>
+    /// <returns></returns>
+    /// 
+
+    List<Vector3> dirP = new List<Vector3>();//大圓中心
+    List<Vector3> randP = new List<Vector3>();//小圓中心
+    float randRange = 5f;
+    float sampleRange = 1.5f;//採樣半徑
+    Vector3 GetRandomPoint(Vector3 currentPos, Vector3 currentDir, float minDistance) {
+        Vector3 randomPoint = Vector3.zero;
+
+        dirP = new List<Vector3>();
+        randP = new List<Vector3>();
+        float value = 45f;
+        float sign = 1;
+        int counter = 0;
+
+        while(randomPoint == Vector3.zero) {
+            float angle = value * Mathf.CeilToInt(counter / 2f) * sign;
+            Vector3 newDir = Quaternion.AngleAxis(angle, Vector3.up) * currentDir;
+            Vector3 dirPoint = currentPos + newDir * minDistance;
+            Vector3 randPoint = dirPoint + Random.insideUnitSphere * randRange / 2;//隨機的方向
+            bool foundPoint = NavMesh.SamplePosition(randPoint, out NavMeshHit hit, sampleRange, NavMesh.AllAreas);
+
+            dirP.Add(dirPoint);
+            randP.Add(randPoint);
+
+            counter++;
+            sign = -sign;
+
+            if(foundPoint && Vector3.Distance(currentPos, hit.position) > minDistance) {
+                randomPoint = hit.position;
+            }
+        }
+
+        return randomPoint;
+    }
+
     #region AI_Behaviour
-    Vector3 p;
-    Vector3 randP;
+    float stateTime = 5f;
 
     private void Idle() {
         agent.ResetPath();
@@ -182,12 +223,8 @@ public class AICtrl : AvatarCtrl {
         if(isChangeState || agent.remainingDistance < 1) {
             //Debug.Log(name + " Set Wonder Path");
 
-            Vector3 wanderPoint = transform.position + transform.forward * randRange + Random.insideUnitSphere * randRange;//隨機的方向
-            NavMesh.SamplePosition(wanderPoint, out NavMeshHit hit, sampleRange, NavMesh.AllAreas);
-            agent.SetDestination(hit.position);
-
-            p = transform.position + transform.forward * randRange;
-            randP = wanderPoint;
+            Vector3 nextPoint = GetRandomPoint(transform.position, transform.forward, randRange);
+            agent.SetDestination(nextPoint);
         }
 
         if(isChangeState) {
@@ -211,18 +248,11 @@ public class AICtrl : AvatarCtrl {
         if(isChangeState || agent.remainingDistance < 1) {
             //Debug.Log(name + " Set Flee Path");
             Vector3 fleeDir = (transform.position - targetLastPosition).normalized;
-            Vector3 fleePoint = transform.position + fleeDir * randRange + Random.insideUnitSphere * randRange;//隨機的方向
-            NavMesh.SamplePosition(fleePoint, out NavMeshHit hit, sampleRange, NavMesh.AllAreas);
-
-            agent.SetDestination(hit.position);
-
-            p = transform.position + fleeDir * randRange;
-            randP = fleePoint;
+            Vector3 nextPoint = GetRandomPoint(transform.position, fleeDir, randRange);
+            agent.SetDestination(nextPoint);
         }
 
         if(isChangeState) {
-            m_target = null;//轉身後看不到對像
-
             agent.isStopped = false;
             isMoving = true;
             agent.speed = MoveSpeed(true);
@@ -238,13 +268,7 @@ public class AICtrl : AvatarCtrl {
     private void Hunt() {
 
         if(m_target == null && agent.remainingDistance < 1) {
-            //Debug.Log(name + " Set Wonder Path");
-            float randomRange = 5f;
-
-            Vector3 randPoint = transform.position + transform.forward * randomRange / 2 + Random.insideUnitSphere * randomRange;//隨機的方向
-            NavMesh.SamplePosition(randPoint, out NavMeshHit hit, 3f, NavMesh.AllAreas);
-
-            agent.SetDestination(hit.position);
+            stateTimer = 0;
         }
         else {
             agent.SetDestination(targetLastPosition);
@@ -266,7 +290,7 @@ public class AICtrl : AvatarCtrl {
         if(agent == null) { return; }
 
         //路線
-        Gizmos.color = Color.gray;
+        Gizmos.color = gameObject.CompareTag(AvatarTag.Tagger.ToString()) ? Color.red : Color.green ;
         Vector3[] path = agent.path.corners;
         if(path != null) {
             if(path.Length > 0) {
@@ -276,18 +300,20 @@ public class AICtrl : AvatarCtrl {
             }
         }
 
-        //隨機找點的範圍
-        if(state == AIState.Wonder) {
+        /*採樣時的點
+        if(gameObject.CompareTag(AvatarTag.Runner.ToString())) {
+            //隨機找點的範圍
             Gizmos.color = Color.white;
-            Gizmos.DrawWireSphere(p, randRange);
-            Gizmos.DrawWireSphere(randP, sampleRange);
-        }
 
-        if(state == AIState.Flee) {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(p, randRange);
-            Gizmos.DrawWireSphere(randP, sampleRange);
+            foreach(Vector3 p in dirP) {
+                Gizmos.DrawWireSphere(p, randRange/2);
+            }
+            foreach(Vector3 p in randP) {
+                Gizmos.DrawWireSphere(p, sampleRange);
+            }
         }
+        */
+
     }
 
 }

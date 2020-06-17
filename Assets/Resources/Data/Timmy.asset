@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   description: "\u5C0F\u5B69\uFF0C\u6709\u5F37\u5927\u7684\u7206\u767C\u529B"
   walkSpeed: 1
-  runSpeed: 5
+  runSpeed: 3.5
   maxStamina: 50
   ability: 
   avatarPrefab: {fileID: 7323010480979060359, guid: 5f766675462fd3d49b7f171119a11d71,

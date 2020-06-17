@@ -56,7 +56,7 @@ NavMeshAgent:
   m_GameObject: {fileID: 7181169535525727663}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 0.1
+  m_Radius: 0.075
   m_Speed: 3.5
   m_Acceleration: 10
   avoidancePriority: 50
@@ -124,6 +124,8 @@ MonoBehaviour:
   state: 0
   sensor: {fileID: 7181169535525727698}
   agent: {fileID: 7181169535525727699}
+  isChangeState: 0
+  stateTimer: 0
   m_target: {fileID: 0}
 --- !u!136 &5214925531767139327
 CapsuleCollider:

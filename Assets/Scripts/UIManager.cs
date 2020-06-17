@@ -16,7 +16,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] GameObject gameOverPanel = null;
     [SerializeField] Text gameOverText = null;
 
-    [SerializeField] LevelManager levelManager;
+    [SerializeField] LevelManager levelManager = null;
 
     private void Update() {
         gameText.text = "UnFreeze: " + levelManager.UnFrezzePlayer.ToString("00") + "\t";
